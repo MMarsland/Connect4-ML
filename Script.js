@@ -54,34 +54,10 @@ function reset() {
   updateView(gameData.gameBoard);
 }
 
-async function playSecond() {
+function playSecond() {
   console.log('Playing Second');
   reset();
-  if(globals.gameMode === "minimax") {
-    console.log("MINIMAX")
-    // Hide Highlight
-    hideHighlightedColumn();
-    updateThinking(1);
-    gameData.AIMove = true;
-    
-    // Allow UI to update
-    await sleep(1);
-
-    // AI MOVE
-    let action = await getActionByMinimax(gameData.bluesTurn, gameData.gameBoard, 8);
-
-    gameData.gameBoard = placeInBoard(gameData.gameBoard, action, gameData.bluesTurn);
-    gameData.bluesTurn = !gameData.bluesTurn;
-    gameData.AIMove = false;
-
-    updateView(gameData.gameBoard);
-
-    //Show Highlight
-    showHighlightedColumn();
-    updateThinking(0);
-  } else if (lobals.gameMode === "q-tables") {
-    // TODO
-  }
+  opponentsTurn();
 }
 
 // UI FUNCTIONS
@@ -153,7 +129,7 @@ function hideButtons(buttons) {
     document.getElementById(buttonId).classList.add("hidden");
   }
 }
-let thinkingState = 0;
+let thinkingState = 0; // Function Static
 function updateThinking(state) {
   thinkingState = (thinkingState % 3) + 1;
   if (state != undefined) {
@@ -170,70 +146,54 @@ function updateThinking(state) {
     thinkingArea.innerHTML = "Thinking...";
   }
 }
-async function columnClicked(colNum) {
+function columnClicked(colNum) {
   console.log("Column Clicked")
+  if (gameData.AIMove) {return;}
+
+  placePiece(colNum);
+
+  opponentsTurn();
+}
+
+async function opponentsTurn() {
   if (globals.gameMode === "human") {
-    console.log("HUMAN")
-    // Human Playable
-    if (columnFull(gameData.gameBoard, colNum) || gameData.winner) {return;}
-    gameData.gameBoard = placeInBoard(gameData.gameBoard, colNum, gameData.bluesTurn);
-    gameData.bluesTurn = !gameData.bluesTurn;
-
-    updateView(gameData.gameBoard);
-
-    gameData.winner = checkForWin(gameData.gameBoard);
-    if (gameData.winner != null) {
-      document.getElementById("nextTurn").innerHTML = gameData.winner==1?"Winner: Blue!":(gameData.winner == 2? "Winner: Yellow!": "Tie Game!");
-      return;
-    }
+    return;
   } else if (globals.gameMode === "minimax") {
     console.log("MINIMAX")
-    if (gameData.AIMove || columnFull(gameData.gameBoard, colNum) || gameData.winner) {return;}
-
     // Hide Highlight
+    gameData.AIMove = true
     hideHighlightedColumn();
     updateThinking(1);
-
-    // Make player move
-    gameData.gameBoard = placeInBoard(gameData.gameBoard, colNum, gameData.bluesTurn);
-    gameData.bluesTurn = !gameData.bluesTurn;
-    gameData.AIMove = true;
-
-    updateView(gameData.gameBoard);
-
-    // Check for win after player move
-    gameData.winner = checkForWin(gameData.gameBoard);
-    if (gameData.winner != null) {
-      document.getElementById("nextTurn").innerHTML = gameData.winner==1?"Winner: Blue!":(gameData.winner == 2? "Winner: Yellow!": "Tie Game!");
-      updateThinking(0);
-      return;
-    }
-    
+  
     // Allow UI to update
     await sleep(1);
 
     // AI MOVE
-    let action = await getActionByMinimax(gameData.bluesTurn, gameData.gameBoard, 8);
+    let colNum = await getActionByMinimax(gameData.bluesTurn, gameData.gameBoard, 8);
 
-
-    gameData.gameBoard = placeInBoard(gameData.gameBoard, action, gameData.bluesTurn);
-    gameData.bluesTurn = !gameData.bluesTurn;
-    gameData.AIMove = false;
-
-    updateView(gameData.gameBoard);
-
-    gameData.winner = checkForWin(gameData.gameBoard);
-    if (gameData.winner != null) {
-      document.getElementById("nextTurn").innerHTML = gameData.winner==1?"Winner: Blue!":(gameData.winner == 2? "Winner: Yellow!": "Tie Game!");
-      updateThinking(0);
-      return;
-    }
+    placePiece(colNum);
 
     //Show Highlight
-    showHighlightedColumn();
     updateThinking(0);
+    showHighlightedColumn();
+    gameData.AIMove = false
+
   } else if (globals.gameMode === "q-tables") {
     // TODO
+  }
+}
+function placePiece(colNum) {
+  if (columnFull(gameData.gameBoard, colNum) || gameData.winner) {return;}
+  gameData.gameBoard = placeInBoard(gameData.gameBoard, colNum, gameData.bluesTurn);
+  gameData.bluesTurn = !gameData.bluesTurn;
+
+  updateView(gameData.gameBoard);
+
+  gameData.winner = checkForWin(gameData.gameBoard);
+  if (gameData.winner != null) {
+    document.getElementById("nextTurn").innerHTML = gameData.winner==1?"Winner: Blue!":(gameData.winner == 2? "Winner: Yellow!": "Tie Game!");
+    updateThinking(0);
+    return;
   }
 }
 
