@@ -2,7 +2,12 @@
 function navToGame() {
   document.getElementById("menu").classList.add("hidden");
   document.getElementById("game-frame").classList.remove("hidden");
-  buildBoard();
+  reset();
+}
+
+function back() {
+  document.getElementById("game-frame").classList.add("hidden");
+  document.getElementById("menu").classList.remove("hidden");
 }
 
 function start(mode) {
@@ -10,8 +15,11 @@ function start(mode) {
   globals.gameMode = mode;
   if (mode === "human") {
     navToGame();
+    hideButtons(["play-second"]);
   } else if (mode === "minimax") {
-    // TODO: PLAY FIRST OR SECOND, BUTTON & IMP
+    navToGame();
+    showButtons(["play-second"]);
+  } else if (mode === "q-tables") {
     navToGame();
     showButtons(["play-second"]);
   } else {
@@ -32,6 +40,48 @@ let gameData = {
 }
 
 function onload() {
+}
+
+// These function affect globals ***
+function reset() {
+  gameData = {
+    gameBoard: [[0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0]],
+    bluesTurn: true,
+    winner: false,
+    AIMove: false
+  }
+  buildBoard();
+  updateView(gameData.gameBoard);
+}
+
+async function playSecond() {
+  console.log('Playing Second');
+  reset();
+  if(globals.gameMode === "minimax") {
+    console.log("MINIMAX")
+    // Hide Highlight
+    hideHighlightedColumn();
+    updateThinking(1);
+    gameData.AIMove = true;
+    
+    // Allow UI to update
+    await sleep(1);
+
+    // AI MOVE
+    let action = await getActionByMinimax(gameData.bluesTurn, gameData.gameBoard, 8);
+
+    gameData.gameBoard = placeInBoard(gameData.gameBoard, action, gameData.bluesTurn);
+    gameData.bluesTurn = !gameData.bluesTurn;
+    gameData.AIMove = false;
+
+    updateView(gameData.gameBoard);
+
+    //Show Highlight
+    showHighlightedColumn();
+    updateThinking(0);
+  } else if (lobals.gameMode === "q-tables") {
+    // TODO
+  }
 }
 
 // UI FUNCTIONS
@@ -98,6 +148,11 @@ function showButtons(buttons) {
     document.getElementById(buttonId).classList.remove("hidden");
   }
 }
+function hideButtons(buttons) {
+  for(let buttonId of buttons) {
+    document.getElementById(buttonId).classList.add("hidden");
+  }
+}
 let thinkingState = 0;
 function updateThinking(state) {
   thinkingState = (thinkingState % 3) + 1;
@@ -115,7 +170,6 @@ function updateThinking(state) {
     thinkingArea.innerHTML = "Thinking...";
   }
 }
-
 async function columnClicked(colNum) {
   console.log("Column Clicked")
   if (globals.gameMode === "human") {
@@ -178,9 +232,10 @@ async function columnClicked(colNum) {
     //Show Highlight
     showHighlightedColumn();
     updateThinking(0);
+  } else if (globals.gameMode === "q-tables") {
+    // TODO
   }
 }
-
 
 // SYSTEM FUNCTIONS
 function deepCopyMatrix(matrix) {
@@ -194,7 +249,6 @@ function deepCopyMatrix(matrix) {
   }
   return newMatrix;
 }
-
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
@@ -271,46 +325,6 @@ function checkForWin(board) {
   }
   return null;
 }
-// These function affect globals ***
-function reset() {
-  gameData = {
-    gameBoard: [[0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0]],
-    bluesTurn: true,
-    winner: false,
-    AIMove: false
-  }
-  buildBoard();
-  updateView(gameData.gameBoard);
-}
-async function playSecond() {
-  console.log('Playing Second');
-  reset();
-  if(globals.gameMode === "minimax") {
-    console.log("MINIMAX")
-    // Hide Highlight
-    hideHighlightedColumn();
-    updateThinking(1);
-    gameData.AIMove = true;
-    
-    // Allow UI to update
-    await sleep(1);
-
-    // AI MOVE
-    let action = await getActionByMinimax(gameData.bluesTurn, gameData.gameBoard, 8);
-
-    gameData.gameBoard = placeInBoard(gameData.gameBoard, action, gameData.bluesTurn);
-    gameData.bluesTurn = !gameData.bluesTurn;
-    gameData.AIMove = false;
-
-    updateView(gameData.gameBoard);
-
-    //Show Highlight
-    showHighlightedColumn();
-    updateThinking(0);
-  }
-}
-
-
 
 // MINIMAX FUNCTIONS
 let callCount = 0;
