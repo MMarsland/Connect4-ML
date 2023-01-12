@@ -169,7 +169,7 @@ async function opponentsTurn() {
     await sleep(1);
 
     // AI MOVE
-    let colNum = await getActionByMinimax(gameData.bluesTurn, gameData.gameBoard, 8);
+    let colNum = await getActionByMinimax(gameData.bluesTurn, gameData.gameBoard, 8); // A depth of 8 is used here
 
     placePiece(colNum);
 

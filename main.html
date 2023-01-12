@@ -11,10 +11,10 @@
           <div id="menu">
             <div class="title">Connect4</div>
             <div id="options-area">
-              <button id="human" class="options-button" onclick="start('human')">Human</button>
-              <button id="minimax" class="options-button" onclick="start('minimax')">Minimax</button>
-              <button id="q-tables" class="options-button" onclick="start('q-tables')" style="background: darkgray">Q-Tables</button>
-              <button id="neuralNetwork" class="options-button" onclick="start('neuralNetwork')" disabled>Neural Network</button>
+              <button id="human" class="options-button" onclick="start('human')" title="Play against yourself">Human</button>
+              <button id="minimax" class="options-button" onclick="start('minimax')" title="Minimax Depth 8">Minimax</button>
+              <button id="q-tables" class="options-button" onclick="start('q-tables')" disabled title="Incomplete Implementation">Q-Tables</button>
+              <button id="neuralNetwork" class="options-button" onclick="start('neuralNetwork')" disabled title="Incomplete Implementation">Neural Network</button>
             </div>
           </div>
           <div id="game-frame" class="frame hidden">
