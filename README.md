@@ -1,6 +1,6 @@
 # Connect4-ML
 
-**--ARCHIVED--**
+**--ARCHIVED--**  
  A game Connect4 to be played against various ML methods, starting with minimax, experimentation with Q-Learning and Neural Networks was also completed.
 
 ## Development / Testing
